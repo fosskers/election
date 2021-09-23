@@ -1,9 +1,7 @@
-// 10001,"Avalon","Avalon"," 1","Freshwater",N,N,"",0,121,"Chapman","","Matthew",
-// "Conservative","Conservateur",N,N,33
-
 use itertools::Itertools;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
+use std::collections::HashMap;
 
 /// A particular poll within a riding. We expect an entry per party.
 #[derive(Debug, PartialEq, Eq, Deserialize, Clone)]
@@ -47,7 +45,7 @@ impl Ord for Poll {
 }
 
 /// A candidate's political party.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Deserialize, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Clone)]
 enum Party {
     #[serde(rename = "Liberal")]
     LIB,
@@ -61,12 +59,49 @@ enum Party {
     GRN,
     #[serde(rename = "People's Party")]
     PPC,
+    #[serde(rename = "Libertarian")]
+    LTN,
     #[serde(rename = "Communist")]
     COM,
     #[serde(rename = "Independent")]
     IND,
-    #[serde(other)]
-    OTH,
+    // --- Small parties --- //
+    #[serde(rename = "Parti Rhinocéros Party")]
+    RIN,
+    #[serde(rename = "National Citizens Alliance")]
+    NCA,
+    #[serde(rename = "Animal Protection Party")]
+    APP,
+    #[serde(rename = "VCP")]
+    VCP,
+    #[serde(rename = "Christian Heritage Party")]
+    CHP,
+    #[serde(rename = "Pour l'Indépendance du Québec")]
+    PIQ,
+    /// Marxist-Leninist
+    #[serde(rename = "ML")]
+    MXL,
+    #[serde(rename = "No Affiliation")]
+    NOA,
+    #[serde(rename = "UPC")]
+    UPC,
+    #[serde(rename = "Radical Marijuana")]
+    RMJ,
+    #[serde(rename = "PC Party")]
+    PCP,
+    #[serde(rename = "Stop Climate Change")]
+    SCC,
+    #[serde(rename = "CFF - Canada's Fourth Front")]
+    CFF,
+    #[serde(rename = "Nationalist")]
+    NAT,
+}
+
+#[derive(Serialize)]
+struct VoteCount {
+    party: Party,
+    votes: u32,
+    perc: f32,
 }
 
 fn main() -> Result<(), std::io::Error> {
@@ -96,11 +131,29 @@ fn main() -> Result<(), std::io::Error> {
         .filter_map(|(_, group)| group.reduce(|a, b| a.fuse(b)))
         .collect();
 
-    for poll in unified.iter() {
-        println!("{:?}", poll);
-    }
-
-    println!("Polls: {}", unified.len());
+    totals(unified);
 
     Ok(())
+}
+
+fn totals(unified: Vec<Poll>) {
+    let mut totals = HashMap::new();
+
+    for poll in unified.iter() {
+        let entry = totals.entry(&poll.party).or_insert(0);
+        *entry += poll.votes;
+    }
+
+    let total_votes: u32 = totals.values().sum();
+
+    let vote_counts: Vec<VoteCount> = totals
+        .into_iter()
+        .map(|(party, votes)| VoteCount {
+            party: party.clone(),
+            votes,
+            perc: votes as f32 / total_votes as f32,
+        })
+        .collect();
+
+    println!("{}", serde_json::to_string(&vote_counts).unwrap());
 }
