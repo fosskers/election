@@ -124,9 +124,8 @@ fn main() -> Result<(), std::io::Error> {
 
     let unified: Vec<Poll> = polls
         .into_iter()
-        // `clone` of enums is cheap, but the string clone is wasteful.
-        // Grouping is weird in Rust.
-        .group_by(|poll| (poll.party.clone(), poll.last_name.to_string()))
+        // `clone` of enums is cheap.
+        .group_by(|poll| poll.party.clone())
         .into_iter()
         .filter_map(|(_, group)| group.reduce(|a, b| a.fuse(b)))
         .collect();
