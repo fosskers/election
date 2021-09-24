@@ -10,6 +10,7 @@ After building, see =election --help= for the available options.
   - [[#party-results-per-riding][Party Results per Riding]]
   - [[#party-results-per-riding-won-seats-only][Party Results per Riding (won seats only)]]
   - [[#per-party-totals][Per-party Totals]]
+  - [[#average-win-ratios][Average Win Ratios]]
 
 * Getting the Data
 
@@ -113,3 +114,27 @@ cargo run --release -- --total | from json | sort-by votes | reverse
  22 │ Nationalist                   │   281   │ 0.0000 │   0
 ────┴───────────────────────────────┴─────────┴────────┴───────
 #+end_example
+
+** Average Win Ratios
+
+How good is each party at winning the seats they win? That is, regardless of how
+many seats they did actually win, in cases where they won, did they win by a
+large amount? We can find such average win ratios:
+
+#+begin_example
+cargo run --release -- --party=blq | from json | where won | get ratio | math avg
+0.448361485625
+#+end_example
+
+#+begin_example
+cargo run --release -- --party=ndp | from json | where won | get ratio | math avg
+0.418011905
+#+end_example
+
+#+begin_example
+cargo run --release -- --party=grn | from json | where won | get ratio | math avg
+0.39112569
+#+end_example
+
+So for the seats they won in 2019, the Bloc seemed to win by higher percentages
+than the NDP and the Greens.
