@@ -35,7 +35,7 @@ navigate as follows:
 + Canada / Provinces / Territories
 + Canada (Poll-by-poll Results - Format 2)
 
-_You must use the Format 2 data._
+*You must use the Format 2 data.*
 
 Download this data and unzip its contents into =data/2019/= within your clone of
 this repository.
