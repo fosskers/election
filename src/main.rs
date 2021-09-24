@@ -23,6 +23,10 @@ struct Args {
     /// How a given Party did in every riding.
     #[clap(group = "choice", long, display_order = 1, arg_enum)]
     party: Option<Party>,
+
+    /// The election year to consider.
+    #[clap(long, display_order = 2, possible_values = &["2019"], default_value = "2019")]
+    year: usize,
 }
 
 #[derive(Debug)]
@@ -208,8 +212,9 @@ struct PartyResults {
 
 fn main() -> Result<(), std::io::Error> {
     let args = Args::parse();
+    let data = format!("data/{}", args.year);
 
-    let mut polls: Vec<Poll> = std::fs::read_dir("data/2019")?
+    let mut polls: Vec<Poll> = std::fs::read_dir(data)?
         .filter_map(|de| de.ok())
         .filter_map(|de| csv::Reader::from_path(de.path()).ok())
         // Unfortunate `collect` due to the `reader` being owned.
