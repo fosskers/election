@@ -9,6 +9,20 @@ struct Riding {
     candidates: HashMap<Party, Candidate>,
 }
 
+impl Riding {
+    /// Was the given [`Party`] the winner of this riding?
+    fn winner(&self, party: Party) -> bool {
+        let winning_party: &Party = self
+            .candidates
+            .iter()
+            .max_by(|(_, a), (_, b)| a.votes.cmp(&b.votes))
+            .unwrap()
+            .0;
+
+        &party == winning_party
+    }
+}
+
 #[derive(Debug)]
 struct Candidate {
     last_name: String,
@@ -149,9 +163,11 @@ fn main() -> Result<(), std::io::Error> {
 
     // totals(unified);
 
-    for riding in ridings(unified) {
-        println!("{:?}", riding);
-    }
+    // for riding in ridings(unified) {
+    //     println!("{:?}", riding);
+    // }
+
+    ppc_con(unified);
 
     Ok(())
 }
@@ -182,8 +198,28 @@ fn ridings(polls: Vec<Poll>) -> Vec<Riding> {
 
 /// For ridings in which the Liberals won, would the combined CON + PPC have
 /// swung the result?
-fn ppc_con() {
-    todo!()
+fn ppc_con(polls: Vec<Poll>) {
+    println!("Ridings in which a combined CON + PPC would have beaten the Liberals:");
+
+    ridings(polls)
+        .iter()
+        .filter(|riding| riding.winner(Party::LIB))
+        .filter_map(|riding| {
+            let cs = &riding.candidates;
+            cs.get(&Party::LIB).and_then(|lib| {
+                cs.get(&Party::CON)
+                    .and_then(|con| cs.get(&Party::PPC).map(|ppc| (riding, lib, con, ppc)))
+            })
+        })
+        .filter(|(_, l, c, p)| c.votes + p.votes > l.votes)
+        .for_each(|(riding, l, c, p)| {
+            println!(
+                "  {}: CON+PPC = {}, LIB = {}",
+                riding.name,
+                c.votes + p.votes,
+                l.votes
+            );
+        });
 }
 
 /// Vote totals per party.
