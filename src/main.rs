@@ -1,7 +1,20 @@
+use clap::{crate_version, Clap};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::HashMap;
+
+#[derive(Clap)]
+#[clap(author = "Colin Woodbury", version = crate_version!(), about = "Canadian Federal Election data")]
+struct Args {
+    /// Total votes for every party.
+    #[clap(group = "choice", long, display_order = 1)]
+    total: bool,
+
+    /// Ridings where CON would have won if there was no PPC split.
+    #[clap(group = "choice", long, display_order = 1)]
+    conppc: bool,
+}
 
 #[derive(Debug)]
 struct Riding {
@@ -140,6 +153,8 @@ struct ComboVictory {
 }
 
 fn main() -> Result<(), std::io::Error> {
+    let args = Args::parse();
+
     let mut polls: Vec<Poll> = std::fs::read_dir("data/2019")?
         .filter_map(|de| de.ok())
         .filter_map(|de| csv::Reader::from_path(de.path()).ok())
@@ -165,8 +180,11 @@ fn main() -> Result<(), std::io::Error> {
         .filter_map(|(_, group)| group.reduce(|a, b| a.fuse(b)))
         .collect();
 
-    totals(unified);
-    // ppc_con(unified);
+    if args.total {
+        totals(unified);
+    } else if args.conppc {
+        ppc_con(unified);
+    }
 
     Ok(())
 }
