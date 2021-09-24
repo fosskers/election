@@ -8,7 +8,7 @@ use std::ops::Not;
 #[derive(Clap)]
 #[clap(author = "Colin Woodbury", version = crate_version!(), about = "Canadian Federal Election data")]
 struct Args {
-    /// Total votes for every party.
+    /// Total votes and seats for every party.
     #[clap(group = "choice", long, display_order = 1)]
     total: bool,
 
@@ -34,16 +34,17 @@ struct Riding {
 impl Riding {
     /// Was the given [`Party`] the winner of this riding?
     fn was_winner(&self, party: &Party) -> bool {
-        party == self.winner()
+        party == &self.winner()
     }
 
     /// The victories party in this riding.
-    fn winner(&self) -> &Party {
+    fn winner(&self) -> Party {
         self.candidates
             .iter()
             .max_by(|(_, a), (_, b)| a.votes.cmp(&b.votes))
             .unwrap()
             .0
+            .clone()
     }
 
     /// The margin of victory for this `Riding`.
@@ -169,6 +170,7 @@ struct VoteCount {
     party: Party,
     votes: usize,
     ratio: f32,
+    seats: usize,
 }
 
 #[derive(Serialize)]
@@ -334,7 +336,7 @@ fn ppc_con(polls: Vec<Poll>) {
         .filter_map(|riding| {
             let cs = &riding.candidates;
             let winner = riding.winner();
-            cs.get(winner).and_then(|win| {
+            cs.get(&winner).and_then(|win| {
                 cs.get(&Party::CON).and_then(|con| {
                     cs.get(&Party::PPC)
                         .map(|ppc| (riding, winner, win, con, ppc))
@@ -354,21 +356,28 @@ fn ppc_con(polls: Vec<Poll>) {
     println!("{}", serde_json::to_string(&wins).unwrap());
 }
 
-/// Vote totals per party.
+/// Vote and seat totals per party.
 fn totals(unified: Vec<Poll>) {
-    let mut totals = HashMap::new();
+    let mut votes: HashMap<Party, usize> = HashMap::new();
+    let mut seats: HashMap<Party, usize> = HashMap::new();
 
-    for poll in unified.iter() {
-        let entry = totals.entry(&poll.party).or_insert(0);
-        *entry += poll.votes;
+    for riding in ridings(unified) {
+        let party = riding.winner();
+        let entry = seats.entry(party).or_insert(0);
+        *entry += 1;
+
+        for (party, candidate) in riding.candidates {
+            let entry = votes.entry(party).or_insert(0);
+            *entry += candidate.votes;
+        }
     }
 
-    let total_votes: usize = totals.values().sum();
-
-    let vote_counts: Vec<VoteCount> = totals
+    let total_votes: usize = votes.values().sum();
+    let vote_counts: Vec<VoteCount> = votes
         .into_iter()
         .map(|(party, votes)| VoteCount {
-            party: party.clone(),
+            seats: seats.remove(&party).unwrap_or(0),
+            party,
             votes,
             ratio: votes as f32 / total_votes as f32,
         })
