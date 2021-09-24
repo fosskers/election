@@ -3,6 +3,19 @@ use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
+#[derive(Debug)]
+struct Riding {
+    name: String,
+    candidates: HashMap<Party, Candidate>,
+}
+
+#[derive(Debug)]
+struct Candidate {
+    last_name: String,
+    first_name: String,
+    votes: usize,
+}
+
 /// A particular poll within a riding. We expect an entry per party.
 #[derive(Debug, PartialEq, Eq, Deserialize, Clone)]
 struct Poll {
@@ -15,7 +28,7 @@ struct Poll {
     #[serde(rename = "Candidate’s First Name/Prénom du candidat")]
     first_name: String,
     #[serde(rename = "Candidate Poll Votes Count/Votes du candidat pour le bureau")]
-    votes: u32,
+    votes: usize,
 }
 
 impl Poll {
@@ -100,8 +113,8 @@ enum Party {
 #[derive(Serialize)]
 struct VoteCount {
     party: Party,
-    votes: u32,
-    perc: f32,
+    votes: usize,
+    ratio: f32,
 }
 
 fn main() -> Result<(), std::io::Error> {
@@ -130,11 +143,50 @@ fn main() -> Result<(), std::io::Error> {
         .filter_map(|(_, group)| group.reduce(|a, b| a.fuse(b)))
         .collect();
 
-    totals(unified);
+    // for poll in unified {
+    //     println!("{:?}", poll);
+    // }
+
+    // totals(unified);
+
+    for riding in ridings(unified) {
+        println!("{:?}", riding);
+    }
 
     Ok(())
 }
 
+fn ridings(polls: Vec<Poll>) -> Vec<Riding> {
+    polls
+        .into_iter()
+        .group_by(|poll| poll.riding.clone())
+        .into_iter()
+        .map(|(name, group)| {
+            let candidates = group
+                .map(|poll| {
+                    let p = poll.party;
+                    let c = Candidate {
+                        last_name: poll.last_name,
+                        first_name: poll.first_name,
+                        votes: poll.votes,
+                    };
+
+                    (p, c)
+                })
+                .collect();
+
+            Riding { name, candidates }
+        })
+        .collect()
+}
+
+/// For ridings in which the Liberals won, would the combined CON + PPC have
+/// swung the result?
+fn ppc_con() {
+    todo!()
+}
+
+/// Vote totals per party.
 fn totals(unified: Vec<Poll>) {
     let mut totals = HashMap::new();
 
@@ -143,14 +195,14 @@ fn totals(unified: Vec<Poll>) {
         *entry += poll.votes;
     }
 
-    let total_votes: u32 = totals.values().sum();
+    let total_votes: usize = totals.values().sum();
 
     let vote_counts: Vec<VoteCount> = totals
         .into_iter()
         .map(|(party, votes)| VoteCount {
             party: party.clone(),
             votes,
-            perc: votes as f32 / total_votes as f32,
+            ratio: votes as f32 / total_votes as f32,
         })
         .collect();
 
