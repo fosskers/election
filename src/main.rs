@@ -3,6 +3,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::ops::Not;
 
 #[derive(Clap)]
 #[clap(author = "Colin Woodbury", version = crate_version!(), about = "Canadian Federal Election data")]
@@ -24,15 +25,17 @@ struct Riding {
 
 impl Riding {
     /// Was the given [`Party`] the winner of this riding?
-    fn winner(&self, party: Party) -> bool {
-        let winning_party: &Party = self
-            .candidates
+    fn was_winner(&self, party: Party) -> bool {
+        &party == self.winner()
+    }
+
+    /// The victories party in this riding.
+    fn winner(&self) -> &Party {
+        self.candidates
             .iter()
             .max_by(|(_, a), (_, b)| a.votes.cmp(&b.votes))
             .unwrap()
-            .0;
-
-        &party == winning_party
+            .0
     }
 }
 
@@ -147,8 +150,9 @@ struct VoteCount {
 #[derive(Serialize)]
 struct ComboVictory {
     riding: String,
-    con_ppc: usize,
-    liberal: usize,
+    winner: Party,
+    winner_votes: usize,
+    con_ppc_votes: usize,
     difference: usize,
 }
 
@@ -213,25 +217,29 @@ fn ridings(polls: Vec<Poll>) -> Vec<Riding> {
         .collect()
 }
 
-/// For ridings in which the Liberals won, would the combined CON + PPC have
-/// swung the result?
+/// For ridings in which the Conservatives lost, would the combined CON + PPC
+/// have swung the result?
 fn ppc_con(polls: Vec<Poll>) {
     let wins: Vec<_> = ridings(polls)
         .iter()
-        .filter(|riding| riding.winner(Party::LIB))
+        .filter(|riding| riding.was_winner(Party::CON).not())
         .filter_map(|riding| {
             let cs = &riding.candidates;
-            cs.get(&Party::LIB).and_then(|lib| {
-                cs.get(&Party::CON)
-                    .and_then(|con| cs.get(&Party::PPC).map(|ppc| (riding, lib, con, ppc)))
+            let winner = riding.winner();
+            cs.get(winner).and_then(|win| {
+                cs.get(&Party::CON).and_then(|con| {
+                    cs.get(&Party::PPC)
+                        .map(|ppc| (riding, winner, win, con, ppc))
+                })
             })
         })
-        .filter(|(_, l, c, p)| c.votes + p.votes > l.votes)
-        .map(|(riding, l, c, p)| ComboVictory {
+        .filter(|(_, _, w, c, p)| c.votes + p.votes > w.votes)
+        .map(|(riding, wp, w, c, p)| ComboVictory {
             riding: riding.name.clone(),
-            con_ppc: c.votes + p.votes,
-            liberal: l.votes,
-            difference: (c.votes + p.votes) - l.votes,
+            winner: wp.clone(),
+            winner_votes: w.votes,
+            con_ppc_votes: c.votes + p.votes,
+            difference: (c.votes + p.votes) - w.votes,
         })
         .collect();
 
