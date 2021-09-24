@@ -1,0 +1,5 @@
+#+TITLE: Data from Canadian Federal Elections
+
+=election= is a small [[https://www.rust-lang.org/][Rust]] program for processing [[https://elections.ca/content.aspx?section=ele&dir=pas&document=index&lang=e][vote data from Canadian Federal Elections]].
+
+After building, see =election --help= for the available options.

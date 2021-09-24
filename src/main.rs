@@ -102,13 +102,11 @@ enum Party {
     GRN,
     #[serde(rename = "People's Party")]
     PPC,
-    #[serde(rename = "Libertarian")]
-    LTN,
-    #[serde(rename = "Communist")]
-    COM,
     #[serde(rename = "Independent")]
     IND,
     // --- Small parties --- //
+    #[serde(rename = "Libertarian")]
+    LTN,
     #[serde(rename = "Parti Rhinocéros Party")]
     RIN,
     #[serde(rename = "National Citizens Alliance")]
@@ -121,6 +119,8 @@ enum Party {
     CHP,
     #[serde(rename = "Pour l'Indépendance du Québec")]
     PIQ,
+    #[serde(rename = "Communist")]
+    COM,
     /// Marxist-Leninist
     #[serde(rename = "ML")]
     MXL,
