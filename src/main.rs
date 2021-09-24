@@ -131,7 +131,7 @@ enum Party {
     // --- Small parties --- //
     #[serde(rename = "Libertarian")]
     LTN,
-    #[serde(rename = "Parti Rhinocéros Party")]
+    #[serde(rename(deserialize = "Parti Rhinocéros Party", serialize = "Rhino"))]
     RIN,
     #[serde(rename = "National Citizens Alliance")]
     NCA,
