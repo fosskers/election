@@ -38,7 +38,15 @@ navigate as follows:
 *You must use the Format 2 data.*
 
 Download this data and unzip its contents into =data/2019/= within your clone of
-this repository.
+this repository. For example:
+
+#+begin_src bash
+mkdir -p data/2019
+cd data/2019
+wget https://elections.ca/res/rep/off/ovr2019app/51/data_donnees/pollresults_resultatsbureauCanada.zip
+unzip pollresults_resultatsbureauCanada.zip
+rm pollresults_resultatsbureauCanada.zip
+#+end_src
 
 * Interpretting the Output
 
