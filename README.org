@@ -8,6 +8,7 @@ After building, see =election --help= for the available options.
 - [[#getting-the-data][Getting the Data]]
 - [[#interpretting-the-output][Interpretting the Output]]
   - [[#party-results-per-riding][Party Results per Riding]]
+  - [[#party-results-per-riding-won-seats-only][Party Results per Riding (won seats only)]]
   - [[#per-party-totals][Per-party Totals]]
 
 * Getting the Data
@@ -54,6 +55,25 @@ cargo run --release -- --party=rin | from json | reverse | first 10
  8 │ Mégantic--L'Érable                 │ Rhino │ Roy                 │ Damien        │  256  │ 0.0053 │ false
  9 │ LaSalle--Émard--Verdun             │ Rhino │ Bélanger            │ Rhino Jacques │  265  │ 0.0050 │ false
 ───┴────────────────────────────────────┴───────┴─────────────────────┴───────────────┴───────┴────────┴───────
+#+end_example
+
+** Party Results per Riding (won seats only)
+
+The big parties have many more candidates than won seats. If we want to see just
+the victorious seats:
+
+#+begin_example
+cargo run --release -- --party=grn | from json | where won | reverse
+#+end_example
+
+#+begin_example
+───┬───────────────────────┬─────────────┬───────────┬────────────┬───────┬────────┬──────
+ # │        riding         │    party    │ last_name │ first_name │ votes │ ratio  │ won
+───┼───────────────────────┼─────────────┼───────────┼────────────┼───────┼────────┼──────
+ 0 │ Saanich--Gulf Islands │ Green Party │ May       │ Elizabeth  │ 33454 │ 0.4908 │ true
+ 1 │ Nanaimo--Ladysmith    │ Green Party │ Manly     │ Paul       │ 24844 │ 0.3457 │ true
+ 2 │ Fredericton           │ Green Party │ Atwin     │ Jenica     │ 16640 │ 0.3367 │ true
+───┴───────────────────────┴─────────────┴───────────┴────────────┴───────┴────────┴──────
 #+end_example
 
 ** Per-party Totals
