@@ -132,7 +132,7 @@ struct VoteCount {
 }
 
 fn main() -> Result<(), std::io::Error> {
-    let mut polls: Vec<Poll> = std::fs::read_dir("data")?
+    let mut polls: Vec<Poll> = std::fs::read_dir("data/2019")?
         .filter_map(|de| de.ok())
         .filter_map(|de| csv::Reader::from_path(de.path()).ok())
         // Unfortunate `collect` due to the `reader` being owned.
@@ -157,15 +157,7 @@ fn main() -> Result<(), std::io::Error> {
         .filter_map(|(_, group)| group.reduce(|a, b| a.fuse(b)))
         .collect();
 
-    // for poll in unified {
-    //     println!("{:?}", poll);
-    // }
-
     // totals(unified);
-
-    // for riding in ridings(unified) {
-    //     println!("{:?}", riding);
-    // }
 
     ppc_con(unified);
 
