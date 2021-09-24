@@ -29,10 +29,10 @@ this repository.
 All results are output as JSON. I use another tool, [[https://www.nushell.sh/][Nushell]], to format the
 results into nice tables.
 
-For example, to see how the Rhinoceros Party did overall:
+For example, to see how the [[https://www.partyrhino.ca/en/][Rhinoceros Party]] (a joke party) did overall:
 
 #+begin_example
-cargo run --release -- --party=rin | from json | reverse
+cargo run --release -- --party=rin | from json | reverse | first 10
 #+end_example
 
 #+begin_example
