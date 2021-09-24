@@ -119,7 +119,10 @@ enum Party {
     LIB,
     #[serde(rename = "Conservative")]
     CON,
-    #[serde(rename = "NDP-New Democratic Party")]
+    #[serde(rename(
+        deserialize = "NDP-New Democratic Party",
+        serialize = "New Democratic Party"
+    ))]
     NDP,
     #[serde(rename = "Bloc Québécois")]
     BLQ,
@@ -132,13 +135,13 @@ enum Party {
     // --- Small parties --- //
     #[serde(rename = "Libertarian")]
     LTN,
-    #[serde(rename(deserialize = "Parti Rhinocéros Party", serialize = "Rhino"))]
+    #[serde(rename(deserialize = "Parti Rhinocéros Party", serialize = "Rhinoceros Party"))]
     RIN,
     #[serde(rename = "National Citizens Alliance")]
     NCA,
     #[serde(rename = "Animal Protection Party")]
     APP,
-    #[serde(rename = "VCP")]
+    #[serde(rename(deserialize = "VCP", serialize = "Veteran's Coalition"))]
     VCP,
     #[serde(rename = "Christian Heritage Party")]
     CHP,
@@ -147,11 +150,11 @@ enum Party {
     #[serde(rename = "Communist")]
     COM,
     /// Marxist-Leninist
-    #[serde(rename = "ML")]
+    #[serde(rename(deserialize = "ML", serialize = "Marxist-Leninist"))]
     MXL,
     #[serde(rename = "No Affiliation")]
     NOA,
-    #[serde(rename = "UPC")]
+    #[serde(rename(deserialize = "UPC", serialize = "United Party of Canada"))]
     UPC,
     #[serde(rename = "Radical Marijuana")]
     RMJ,
@@ -159,7 +162,10 @@ enum Party {
     PCP,
     #[serde(rename = "Stop Climate Change")]
     SCC,
-    #[serde(rename = "CFF - Canada's Fourth Front")]
+    #[serde(rename(
+        deserialize = "CFF - Canada's Fourth Front",
+        serialize = "Canada's Fourth Front"
+    ))]
     CFF,
     #[serde(rename = "Nationalist")]
     NAT,

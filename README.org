@@ -70,24 +70,24 @@ cargo run --release -- --total | from json | sort-by votes | reverse
 ────┼───────────────────────────────┼─────────┼────────┼───────
   0 │ Conservative                  │ 6239227 │ 0.3433 │  121
   1 │ Liberal                       │ 6018728 │ 0.3312 │  157
-  2 │ NDP-New Democratic Party      │ 2903722 │ 0.1598 │  24
+  2 │ New Democratic Party          │ 2903722 │ 0.1598 │  24
   3 │ Bloc Québécois                │ 1387030 │ 0.0763 │  32
   4 │ Green Party                   │ 1189607 │ 0.0654 │   3
   5 │ People's Party                │ 294092  │ 0.0161 │   0
   6 │ Independent                   │  72546  │ 0.0039 │   1
   7 │ Christian Heritage Party      │  18901  │ 0.0010 │   0
-  8 │ Rhino                         │  9538   │ 0.0005 │   0
+  8 │ Rhinoceros Party              │  9538   │ 0.0005 │   0
   9 │ Libertarian                   │  8367   │ 0.0004 │   0
- 10 │ VCP                           │  6300   │ 0.0003 │   0
+ 10 │ Veteran's Coalition           │  6300   │ 0.0003 │   0
  11 │ Animal Protection Party       │  4408   │ 0.0002 │   0
- 12 │ ML                            │  4124   │ 0.0002 │   0
+ 12 │ Marxist-Leninist              │  4124   │ 0.0002 │   0
  13 │ Communist                     │  3905   │ 0.0002 │   0
  14 │ Pour l'Indépendance du Québec │  3815   │ 0.0002 │   0
  15 │ No Affiliation                │  1745   │ 0.0000 │   0
  16 │ PC Party                      │  1534   │ 0.0000 │   0
  17 │ Radical Marijuana             │   920   │ 0.0000 │   0
- 18 │ CFF - Canada's Fourth Front   │   682   │ 0.0000 │   0
- 19 │ UPC                           │   602   │ 0.0000 │   0
+ 18 │ Canada's Fourth Front         │   682   │ 0.0000 │   0
+ 19 │ United Party of Canada        │   602   │ 0.0000 │   0
  20 │ National Citizens Alliance    │   510   │ 0.0000 │   0
  21 │ Stop Climate Change           │   296   │ 0.0000 │   0
  22 │ Nationalist                   │   281   │ 0.0000 │   0
