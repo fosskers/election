@@ -15,7 +15,7 @@ After building, see =election --help= for the available options.
 
 * Installation
 
-You will need =git= and =cargo= installed. To fetch the code and build the =election=
+You will need =git= and [[https://www.rust-lang.org/learn/get-started][cargo]] installed. To fetch the code and build the =election=
 tool:
 
 #+begin_src bash
