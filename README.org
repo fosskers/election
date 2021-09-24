@@ -7,6 +7,8 @@ After building, see =election --help= for the available options.
 * Table of Contents :TOC_2_gh:
 - [[#getting-the-data][Getting the Data]]
 - [[#interpretting-the-output][Interpretting the Output]]
+  - [[#party-results-per-riding][Party Results per Riding]]
+  - [[#per-party-totals][Per-party Totals]]
 
 * Getting the Data
 
@@ -28,6 +30,8 @@ this repository.
 
 All results are output as JSON. I use another tool, [[https://www.nushell.sh/][Nushell]], to format the
 results into nice tables.
+
+** Party Results per Riding
 
 For example, to see how the [[https://www.partyrhino.ca/en/][Rhinoceros Party]] (a joke party) did in each riding:
 
@@ -51,6 +55,8 @@ cargo run --release -- --party=rin | from json | reverse | first 10
  9 │ LaSalle--Émard--Verdun             │ Rhino │ Bélanger            │ Rhino Jacques │  265  │ 0.0050 │ false
 ───┴────────────────────────────────────┴───────┴─────────────────────┴───────────────┴───────┴────────┴───────
 #+end_example
+
+** Per-party Totals
 
 Or perhaps we wish to see how every party did overall:
 
