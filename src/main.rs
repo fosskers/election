@@ -1,4 +1,4 @@
-use clap::{crate_version, Clap};
+use clap::{crate_version, ArgEnum, Clap};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
@@ -12,9 +12,17 @@ struct Args {
     #[clap(group = "choice", long, display_order = 1)]
     total: bool,
 
-    /// Ridings where CON would have won if there was no PPC split.
+    /// Ridings where CON would have won if all PPC had voted CON.
     #[clap(group = "choice", long, display_order = 1)]
     conppc: bool,
+
+    /// Ridings ordered by margin of victory.
+    #[clap(group = "choice", long, display_order = 1)]
+    margins: bool,
+
+    /// How a given Party did in every riding.
+    #[clap(group = "choice", long, display_order = 1, arg_enum)]
+    party: Option<Party>,
 }
 
 #[derive(Debug)]
@@ -25,8 +33,8 @@ struct Riding {
 
 impl Riding {
     /// Was the given [`Party`] the winner of this riding?
-    fn was_winner(&self, party: Party) -> bool {
-        &party == self.winner()
+    fn was_winner(&self, party: &Party) -> bool {
+        party == self.winner()
     }
 
     /// The victories party in this riding.
@@ -36,6 +44,22 @@ impl Riding {
             .max_by(|(_, a), (_, b)| a.votes.cmp(&b.votes))
             .unwrap()
             .0
+    }
+
+    /// The margin of victory for this `Riding`.
+    fn victory_margin(&self) -> f32 {
+        let mut votes: Vec<_> = self.candidates.values().map(|c| c.votes).collect();
+        votes.sort_by(|a, b| b.cmp(&a));
+        let total_votes: usize = votes.iter().sum();
+        let winner = votes[0] as f32;
+        let second = votes[1] as f32;
+
+        (winner - second) / total_votes as f32
+    }
+
+    /// The total votes in this `Riding`.
+    fn total_votes(&self) -> usize {
+        self.candidates.values().map(|c| c.votes).sum()
     }
 }
 
@@ -88,7 +112,7 @@ impl Ord for Poll {
 }
 
 /// A candidate's political party.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Clone, ArgEnum)]
 enum Party {
     #[serde(rename = "Liberal")]
     LIB,
@@ -156,6 +180,24 @@ struct ComboVictory {
     difference: usize,
 }
 
+#[derive(Serialize)]
+struct VictoryMargin {
+    riding: String,
+    winner: Party,
+    margin: f32,
+}
+
+#[derive(Serialize)]
+struct PartyResults {
+    riding: String,
+    party: Party,
+    last_name: String,
+    first_name: String,
+    votes: usize,
+    ratio: f32,
+    won: bool,
+}
+
 fn main() -> Result<(), std::io::Error> {
     let args = Args::parse();
 
@@ -188,6 +230,10 @@ fn main() -> Result<(), std::io::Error> {
         totals(unified);
     } else if args.conppc {
         ppc_con(unified);
+    } else if args.margins {
+        victory_margins(unified);
+    } else if let Some(party) = args.party {
+        party_results(unified, party);
     }
 
     Ok(())
@@ -217,12 +263,74 @@ fn ridings(polls: Vec<Poll>) -> Vec<Riding> {
         .collect()
 }
 
+/// How a given [`Party`] did in every riding.
+fn party_results(polls: Vec<Poll>, party: Party) {
+    let mut results: Vec<_> = ridings(polls)
+        .into_iter()
+        .filter_map(|mut riding| {
+            let won = riding.was_winner(&party);
+            riding.candidates.remove(&party).map(|c| (riding, won, c))
+        })
+        .map(|(riding, won, c)| {
+            //
+            let total = riding.total_votes() + c.votes;
+            let ratio = c.votes as f32 / total as f32;
+
+            PartyResults {
+                riding: riding.name,
+                party: party.clone(),
+                last_name: c.last_name,
+                first_name: c.first_name,
+                votes: c.votes,
+                ratio,
+                won,
+            }
+        })
+        .collect();
+
+    results.sort_by(|a, b| a.ratio.partial_cmp(&b.ratio).unwrap_or(Ordering::Less));
+
+    println!("{}", serde_json::to_string(&results).unwrap());
+}
+
+/// Ordered list of ridings by the victory margin.
+fn victory_margins(polls: Vec<Poll>) {
+    let mut margins: Vec<_> = ridings(polls)
+        .into_iter()
+        .map(|riding| {
+            let margin = riding.victory_margin();
+            let winner = riding.winner();
+
+            VictoryMargin {
+                winner: winner.clone(),
+                riding: riding.name,
+                margin,
+            }
+        })
+        .collect();
+
+    margins.sort_by(|a, b| a.margin.partial_cmp(&b.margin).unwrap_or(Ordering::Less));
+
+    println!("{}", serde_json::to_string(&margins).unwrap());
+}
+
 /// For ridings in which the Conservatives lost, would the combined CON + PPC
 /// have swung the result?
+///
+/// False Assumption #1: All PPC voters are naturally right-wing and would have
+/// otherwise voted CON. Similar to Trump voters in the USA, a section of the
+/// voter base are those disenfranchised with the existing parties and who just
+/// want a new alternative. While right-wing in nature, surely the PPC are
+/// drawing voters from all parts of Canada.
+///
+/// False Assumption #2: Everyone has a fixed party loyalty, and nobody ever
+/// votes for other reasons. In reality there are a myriad of reasons why people
+/// choose a particular party to vote for in a particular riding in a particular
+/// year.
 fn ppc_con(polls: Vec<Poll>) {
     let wins: Vec<_> = ridings(polls)
         .iter()
-        .filter(|riding| riding.was_winner(Party::CON).not())
+        .filter(|riding| riding.was_winner(&Party::CON).not())
         .filter_map(|riding| {
             let cs = &riding.candidates;
             let winner = riding.winner();
