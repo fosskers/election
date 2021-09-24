@@ -131,6 +131,14 @@ struct VoteCount {
     ratio: f32,
 }
 
+#[derive(Serialize)]
+struct ComboVictory {
+    riding: String,
+    con_ppc: usize,
+    liberal: usize,
+    difference: usize,
+}
+
 fn main() -> Result<(), std::io::Error> {
     let mut polls: Vec<Poll> = std::fs::read_dir("data/2019")?
         .filter_map(|de| de.ok())
@@ -157,9 +165,8 @@ fn main() -> Result<(), std::io::Error> {
         .filter_map(|(_, group)| group.reduce(|a, b| a.fuse(b)))
         .collect();
 
-    // totals(unified);
-
-    ppc_con(unified);
+    totals(unified);
+    // ppc_con(unified);
 
     Ok(())
 }
@@ -191,9 +198,7 @@ fn ridings(polls: Vec<Poll>) -> Vec<Riding> {
 /// For ridings in which the Liberals won, would the combined CON + PPC have
 /// swung the result?
 fn ppc_con(polls: Vec<Poll>) {
-    println!("Ridings in which a combined CON + PPC would have beaten the Liberals:");
-
-    ridings(polls)
+    let wins: Vec<_> = ridings(polls)
         .iter()
         .filter(|riding| riding.winner(Party::LIB))
         .filter_map(|riding| {
@@ -204,14 +209,15 @@ fn ppc_con(polls: Vec<Poll>) {
             })
         })
         .filter(|(_, l, c, p)| c.votes + p.votes > l.votes)
-        .for_each(|(riding, l, c, p)| {
-            println!(
-                "  {}: CON+PPC = {}, LIB = {}",
-                riding.name,
-                c.votes + p.votes,
-                l.votes
-            );
-        });
+        .map(|(riding, l, c, p)| ComboVictory {
+            riding: riding.name.clone(),
+            con_ppc: c.votes + p.votes,
+            liberal: l.votes,
+            difference: (c.votes + p.votes) - l.votes,
+        })
+        .collect();
+
+    println!("{}", serde_json::to_string(&wins).unwrap());
 }
 
 /// Vote totals per party.
