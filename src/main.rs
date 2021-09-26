@@ -25,7 +25,7 @@ struct Args {
     party: Option<Party>,
 
     /// The election year to consider.
-    #[clap(long, display_order = 2, possible_values = &["2011", "2015", "2019"], default_value = "2019")]
+    #[clap(long, display_order = 2, possible_values = &["2008", "2011", "2015", "2019"], default_value = "2019")]
     year: usize,
 }
 
@@ -143,14 +143,18 @@ enum Party {
     LTN,
     #[serde(
         rename(deserialize = "Parti Rhinocéros Party", serialize = "Rhinoceros Party"),
-        alias = "Rhinoceros"
+        alias = "Rhinoceros",
+        alias = "neorhino.ca"
     )]
     RIN,
     #[serde(rename = "National Citizens Alliance")]
     NCA,
     #[serde(rename = "Animal Protection Party")]
     APP,
-    #[serde(rename = "Animal Alliance/Environment Voters")]
+    #[serde(
+        rename = "Animal Alliance/Environment Voters",
+        alias = "AAEV Party of Canada"
+    )]
     AAE,
     #[serde(rename = "Democratic Advancement")]
     DAD,
@@ -211,6 +215,15 @@ enum Party {
     WBP,
     #[serde(rename(serialize = "First Peoples National Party"))]
     FPNP,
+    #[serde(rename = "Work Less Party")]
+    WLP,
+    #[serde(rename(serialize = "People's Political Power"))]
+    PPP,
+    #[serde(rename(
+        deserialize = "NL First Party",
+        serialize = "Newfoundland and Labrador First"
+    ))]
+    NLF,
 }
 
 #[derive(Serialize)]

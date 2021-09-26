@@ -26,9 +26,9 @@ cargo build --release
 
 * Getting the Data
 
-=election= currently supports election years 2011, 2015 and 2019, although 2011
-requires manual conversion from LATIN to UTF-8 beforehand. 2021 will be
-supported as soon as the data is made public.
+=election= currently supports election years 2008, 2011, 2015 and 2019, although
+2008 and 2011 require manual conversion from LATIN to UTF-8 beforehand. 2021
+will be supported as soon as the data is made public.
 
 Federal election data [[https://elections.ca/content.aspx?section=ele&dir=pas&document=index&lang=e][can be found here]]. For example, to get the 2019 data,
 navigate as follows:
