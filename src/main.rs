@@ -25,7 +25,7 @@ struct Args {
     party: Option<Party>,
 
     /// The election year to consider.
-    #[clap(long, display_order = 2, possible_values = &["2019"], default_value = "2019")]
+    #[clap(long, display_order = 2, possible_values = &["2015", "2019"], default_value = "2019")]
     year: usize,
 }
 
@@ -134,17 +134,30 @@ enum Party {
     GRN,
     #[serde(rename = "People's Party")]
     PPC,
-    #[serde(rename = "Independent")]
+    #[serde(rename = "Independent", alias = "No Affiliation")]
     IND,
     // --- Small parties --- //
     #[serde(rename = "Libertarian")]
     LTN,
-    #[serde(rename(deserialize = "Parti Rhinocéros Party", serialize = "Rhinoceros Party"))]
+    #[serde(
+        rename(deserialize = "Parti Rhinocéros Party", serialize = "Rhinoceros Party"),
+        alias = "Rhinoceros"
+    )]
     RIN,
     #[serde(rename = "National Citizens Alliance")]
     NCA,
     #[serde(rename = "Animal Protection Party")]
     APP,
+    #[serde(rename = "Animal Alliance/Environment Voters")]
+    AAE,
+    #[serde(rename = "Democratic Advancement")]
+    DAD,
+    ATN,
+    #[serde(rename(
+        deserialize = "Forces et Démocratie - Allier les forces de nos régions",
+        serialize = "Forces et Démocratie"
+    ))]
+    FED,
     #[serde(rename(deserialize = "VCP", serialize = "Veteran's Coalition"))]
     VCP,
     #[serde(rename = "Christian Heritage Party")]
@@ -154,12 +167,18 @@ enum Party {
     #[serde(rename = "Communist")]
     COM,
     /// Marxist-Leninist
-    #[serde(rename(deserialize = "ML", serialize = "Marxist-Leninist"))]
+    #[serde(
+        rename(deserialize = "ML", serialize = "Marxist-Leninist"),
+        alias = "Marxist-Leninist"
+    )]
     MXL,
-    #[serde(rename = "No Affiliation")]
-    NOA,
-    #[serde(rename(deserialize = "UPC", serialize = "United Party of Canada"))]
+    #[serde(
+        rename(deserialize = "UPC", serialize = "United Party of Canada"),
+        alias = "United Party"
+    )]
     UPC,
+    #[serde(rename = "Pirate")]
+    PIR,
     #[serde(rename = "Radical Marijuana")]
     RMJ,
     #[serde(rename = "PC Party")]
@@ -173,6 +192,14 @@ enum Party {
     CFF,
     #[serde(rename = "Nationalist")]
     NAT,
+    #[serde(rename = "Seniors Party")]
+    SNR,
+    #[serde(rename = "Canada Party")]
+    CAD,
+    CAP,
+    #[serde(rename = "The Bridge")]
+    TBR,
+    PACT,
 }
 
 #[derive(Serialize)]
@@ -219,14 +246,7 @@ fn main() -> Result<(), std::io::Error> {
         .filter_map(|de| csv::Reader::from_path(de.path()).ok())
         // Unfortunate `collect` due to the `reader` being owned.
         .flat_map(|mut reader| reader.deserialize::<Poll>().collect::<Vec<_>>().into_iter())
-        .filter_map(|poll| match poll {
-            Err(e) => {
-                eprintln!("{}", e);
-                None
-            }
-            Ok(p) => Some(p),
-        })
-        .collect();
+        .collect::<Result<Vec<Poll>, _>>()?;
 
     // Sort by riding, then party.
     polls.sort();

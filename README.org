@@ -26,8 +26,10 @@ cargo build --release
 
 * Getting the Data
 
-Federal election data [[https://elections.ca/content.aspx?section=ele&dir=pas&document=index&lang=e][can be found here]]. =election= currently only supports 2019.
-2021 will be supported as soon as the data is made public. To get the 2019 data,
+=election= currently supports election years 2015 and 2019. 2021 will be supported
+as soon as the data is made public.
+
+Federal election data [[https://elections.ca/content.aspx?section=ele&dir=pas&document=index&lang=e][can be found here]]. For example, to get the 2019 data,
 navigate as follows:
 
 + 43rd General Election, October 21, 2019
