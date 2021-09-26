@@ -154,6 +154,7 @@ enum Party {
     AAE,
     #[serde(rename = "Democratic Advancement")]
     DAD,
+    #[serde(rename(serialize = "Alliance of the North"))]
     ATN,
     #[serde(rename(
         deserialize = "Forces et Démocratie - Allier les forces de nos régions",
@@ -179,11 +180,14 @@ enum Party {
         alias = "United Party"
     )]
     UPC,
-    #[serde(rename = "Pirate", alias = "Pirate Party")]
+    #[serde(
+        rename(deserialize = "Pirate", serialize = "Pirate Party"),
+        alias = "Pirate Party"
+    )]
     PIR,
     #[serde(rename = "Radical Marijuana")]
     RMJ,
-    #[serde(rename = "PC Party")]
+    #[serde(rename(deserialize = "PC Party", serialize = "Progressive Canadian Party"))]
     PCP,
     #[serde(rename = "Stop Climate Change")]
     SCC,
@@ -198,11 +202,14 @@ enum Party {
     SNR,
     #[serde(rename = "Canada Party")]
     CAD,
+    #[serde(rename(serialize = "Canadian Action Party"))]
     CAP,
     #[serde(rename = "The Bridge")]
     TBR,
     PACT,
+    #[serde(rename(serialize = "Western Block Party"))]
     WBP,
+    #[serde(rename(serialize = "First Peoples National Party"))]
     FPNP,
 }
 
