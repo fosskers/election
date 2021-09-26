@@ -25,7 +25,7 @@ struct Args {
     party: Option<Party>,
 
     /// The election year to consider.
-    #[clap(long, display_order = 2, possible_values = &["2015", "2019"], default_value = "2019")]
+    #[clap(long, display_order = 2, possible_values = &["2011", "2015", "2019"], default_value = "2019")]
     year: usize,
 }
 
@@ -83,8 +83,10 @@ struct Poll {
     #[serde(rename = "Political Affiliation Name_English/Appartenance politique_Anglais")]
     party: Party,
     #[serde(rename = "Candidate’s Family Name/Nom de famille du candidat")]
+    #[serde(alias = "Candidate's Family Name/Nom de famille du candidat")]
     last_name: String,
     #[serde(rename = "Candidate’s First Name/Prénom du candidat")]
+    #[serde(alias = "Candidate's First Name/Prénom du candidat")]
     first_name: String,
     #[serde(rename = "Candidate Poll Votes Count/Votes du candidat pour le bureau")]
     votes: usize,
@@ -160,7 +162,7 @@ enum Party {
     FED,
     #[serde(rename(deserialize = "VCP", serialize = "Veteran's Coalition"))]
     VCP,
-    #[serde(rename = "Christian Heritage Party")]
+    #[serde(rename = "Christian Heritage Party", alias = "CHP Canada")]
     CHP,
     #[serde(rename = "Pour l'Indépendance du Québec")]
     PIQ,
@@ -177,7 +179,7 @@ enum Party {
         alias = "United Party"
     )]
     UPC,
-    #[serde(rename = "Pirate")]
+    #[serde(rename = "Pirate", alias = "Pirate Party")]
     PIR,
     #[serde(rename = "Radical Marijuana")]
     RMJ,
@@ -200,6 +202,8 @@ enum Party {
     #[serde(rename = "The Bridge")]
     TBR,
     PACT,
+    WBP,
+    FPNP,
 }
 
 #[derive(Serialize)]
